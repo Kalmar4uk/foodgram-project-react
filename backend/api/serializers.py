@@ -41,7 +41,7 @@ class UserSerializer(serializers.ModelSerializer):
     )
     password = serializers.CharField(
         max_length=LEN_FIELD['MAX_LEN_PASSWORD'], write_only=True
-        )
+    )
 
     class Meta:
         model = User
