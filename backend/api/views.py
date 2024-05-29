@@ -44,10 +44,10 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(
-            methods=['post', 'delete'],
-            detail=True,
-            permission_classes=(IsAuthenticated,)
-        )
+        methods=['post', 'delete'],
+        detail=True,
+        permission_classes=(IsAuthenticated,)
+    )
     def subscribe(self, request, pk):
         user = request.user
         author = get_object_or_404(User, id=pk)
@@ -227,10 +227,10 @@ class ShoppingCartFile(APIView):
         ingredients = IngredientRecip.objects.filter(
             recip__shopping_carts__author=request.user.id
         ).values(
-                'ingredient__name', 'ingredient__measurement_unit'
-            ).annotate(
-                    amount=Sum('amount')
-                )
+            'ingredient__name', 'ingredient__measurement_unit'
+        ).annotate(
+            amount=Sum('amount')
+        )
         for ingredient in ingredients:
             writer.writerow([
                 f'{ingredient.get("ingredient__name")} '
