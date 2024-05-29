@@ -1,7 +1,6 @@
 import csv
 
 from django.core.management.base import BaseCommand
-
 from recipes.constants import PATH_TO_FILE
 from recipes.models import Ingredient
 
