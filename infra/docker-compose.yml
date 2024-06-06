@@ -1,18 +1,11 @@
 version: '3.8'
-
-volumes:
-  postgres:
-  static:
-  media:
-
 services:
 
   db:
     image: postgres:13
     volumes:
       - postgres_data:/var/lib/postgresql/data/
-    env_file:
-      - .env
+    env_file: .env
 
   backend:
     image: kalmmar4uk/foodgram_backend
@@ -21,29 +14,32 @@ services:
       - media:/app/media/
     depends_on:
       - db
-    env_file:
-      - .env
+    env_file: .env
+    restart: always
     container_name: foodgram_backend
 
   frontend:
-    image: kalmmar4uk/foodgram_frontend
+    env_file: .env
+    image: kalmmar4uk/kittygram_frontend
+    command: cp -r /app/build/. /frontend_static/
     volumes:
-      - ../frontend/:/app/result_build/
-    depends_on:
-      - db
+      - static:/frontend_static
     container_name: foodgram_frontend
 
 
   nginx:
-    image: nginx:1.19.3
+    image: kalmmar4uk/foodgram_frontend
     ports:
       - "80:80"
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
-      - ../frontend/build:/usr/share/nginx/html/
-      - ../docs/:/usr/share/nginx/html/api/docs/
+      - ./docs/:/usr/share/nginx/html/api/docs/
       - static:/var/html/static/
       - media:/var/html/media/
     depends_on:
       - backend
     container_name: foodgram_nginx
+
+volumes:
+  postgres_data:
+  static:
+  media:
