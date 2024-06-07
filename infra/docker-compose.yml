@@ -28,7 +28,7 @@ services:
 
 
   nginx:
-    image: kalmmar4uk/foodgram_frontend
+    image: kalmmar4uk/foodgram_nginx
     ports:
       - "80:80"
     volumes:

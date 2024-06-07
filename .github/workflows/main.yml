@@ -82,7 +82,7 @@ jobs:
           push: true
           tags: kalmmar4uk/foodgram_frontend:latest
   build_nginx_and_push_to_docker_hub:
-    name: Push gateway Docker image to DockerHub
+    name: Push nginx Docker image to DockerHub
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
