@@ -181,9 +181,7 @@ class FavoriteSerializer(FavoriteShoppingCartSerializer):
 
 
 class IngredientRecipSerializer(serializers.ModelSerializer):
-    id = serializers.PrimaryKeyRelatedField(
-        queryset=Ingredient.objects.all()
-    )
+    id = serializers.ReadOnlyField(source='ingredient.id')
     name = serializers.ReadOnlyField(source='ingredient.name')
     measurement_unit = serializers.ReadOnlyField(
         source='ingredient.measurement_unit'
@@ -192,6 +190,17 @@ class IngredientRecipSerializer(serializers.ModelSerializer):
     class Meta:
         model = IngredientRecip
         fields = ('id', 'name', 'measurement_unit', 'amount')
+
+
+class IngredientRecipWriteAndUpdateSerializer(serializers.ModelSerializer):
+    id = serializers.PrimaryKeyRelatedField(
+        queryset=Ingredient.objects.all()
+    )
+    amount = serializers.IntegerField()
+
+    class Meta:
+        model = Ingredient
+        fields = ('id', 'amount')
 
 
 class RecipSerializer(serializers.ModelSerializer):
@@ -242,7 +251,7 @@ class RecipWriteSerializer(serializers.ModelSerializer):
         many=True,
         queryset=Tag.objects.all(),
     )
-    ingredients = IngredientRecipSerializer(many=True)
+    ingredients = IngredientRecipWriteAndUpdateSerializer(many=True)
     author = UserListSerializer(read_only=True)
     image = fields.Base64ImageField()
     is_favorited = serializers.SerializerMethodField()
@@ -303,7 +312,6 @@ class RecipWriteSerializer(serializers.ModelSerializer):
         if (
             not value.get('ingredients') or not value.get('tags')
             or not value.get('name') or not value.get('text')
-            or not value.get('image')
         ):
             raise serializers.ValidationError(
                 'Отсутствует обязательное поле'

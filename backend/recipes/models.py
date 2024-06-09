@@ -18,12 +18,22 @@ class Subscription(models.Model):
         User,
         on_delete=models.CASCADE,
         related_name='following',
-        verbose_name='Автор'
+        verbose_name='Автор',
     )
 
     class Meta:
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
+        constraints = (
+            models.UniqueConstraint(
+                fields=('following', 'user'),
+                name='unique_following'
+            ),
+            models.CheckConstraint(
+                check=~models.Q(user=models.F('following')),
+                name='no_subscribe_to_yourself'
+            ),
+        )
 
     def __str__(self):
         return f'{self.user} подписан на {self.following}'
@@ -76,7 +86,9 @@ class Recip(models.Model):
         'Изображение', upload_to='recipes/image/', default=None
     )
     text = models.TextField('Описание')
-    cooking_time = models.SmallIntegerField('Время приготовления (мин)')
+    cooking_time = models.SmallIntegerField(
+        'Время приготовления (мин)', validators=[validate_time_amount]
+    )
     tags = models.ManyToManyField(Tag, verbose_name='Тег(-и)')
     ingredients = models.ManyToManyField(Ingredient, through='IngredientRecip')
     pub_date = models.DateTimeField(
@@ -128,6 +140,12 @@ class FavoriteShoppingCardModel(models.Model):
 
     class Meta:
         abstract = True
+        constraints = (
+            models.UniqueConstraint(
+                fields=('author', 'recip'),
+                name='unique_favorite_shopping_cart'
+            ),
+        )
 
     def __str__(self):
         return f'Рецепт {self.recip} добавлен у пользователя {self.author}'
@@ -135,15 +153,27 @@ class FavoriteShoppingCardModel(models.Model):
 
 class Favorite(FavoriteShoppingCardModel):
 
-    class Meta:
+    class Meta(FavoriteShoppingCardModel.Meta):
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранное'
         default_related_name = 'favorited'
+        constraints = (
+            models.UniqueConstraint(
+                fields=('author', 'recip'),
+                name='unique_favorite'
+            ),
+        )
 
 
 class ShoppingCart(FavoriteShoppingCardModel):
 
-    class Meta:
+    class Meta(FavoriteShoppingCardModel.Meta):
         verbose_name = 'Корзина'
         verbose_name_plural = 'Корзина'
         default_related_name = 'shopping_carts'
+        constraints = (
+            models.UniqueConstraint(
+                fields=('author', 'recip'),
+                name='unique_shopping_cart'
+            ),
+        )

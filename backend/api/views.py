@@ -151,7 +151,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = IngredientSerializer
     http_method_names = ['get']
     filter_backends = (filters.SearchFilter,)
-    search_fields = ('^name',)
+    search_fields = ('name',)
     pagination_class = None
 
 
