@@ -133,3 +133,6 @@ localhost:8000/api/ingredients/
   }
 ]
    ```
+  
+**Работу выполнил**
+Беспалов Роман https://github.com/Kalmar4uk
