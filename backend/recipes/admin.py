@@ -1,11 +1,11 @@
 from django.contrib import admin
 
-from recipes.models import (Favorite, Ingredient, IngredientRecip, Recip,
+from recipes.models import (Favorite, Ingredient, IngredientRecipe, Recipe,
                             ShoppingCart, Subscription, Tag)
 
 
 class IngredientRecipInline(admin.StackedInline):
-    model = IngredientRecip
+    model = IngredientRecipe
     extra = 0
     min_num = 1
 
@@ -17,7 +17,7 @@ class IngredientAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
 
-@admin.register(Recip)
+@admin.register(Recipe)
 class RecipAdmin(admin.ModelAdmin):
     inlines = (IngredientRecipInline,)
     list_display = (
@@ -51,11 +51,11 @@ class TagAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
 
-@admin.register(IngredientRecip)
+@admin.register(IngredientRecipe)
 class IngredientRecipAdmin(admin.ModelAdmin):
-    list_display = ('recip', 'ingredient', 'amount')
-    list_filter = ('recip', 'amount')
-    search_fields = ('recip', 'ingredient')
+    list_display = ('recipe', 'ingredient', 'amount')
+    list_filter = ('recipe', 'amount')
+    search_fields = ('recipe', 'ingredient')
 
 
 @admin.register(Subscription)
@@ -65,9 +65,9 @@ class SubscriptionAdmin(admin.ModelAdmin):
 
 @admin.register(Favorite)
 class FavoriteAdmin(admin.ModelAdmin):
-    list_filter = ('recip',)
+    list_filter = ('recipe',)
 
 
 @admin.register(ShoppingCart)
 class ShoppingCartAdmin(admin.ModelAdmin):
-    list_filter = ('recip',)
+    list_filter = ('recipe',)

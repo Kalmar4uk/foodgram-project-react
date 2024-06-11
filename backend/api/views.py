@@ -1,5 +1,3 @@
-import csv
-
 from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
@@ -14,15 +12,16 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from api.filters import RecipesFilter
+from api.loading_shopping_list import download_file
 from api.pagination import CustomPagination
 from api.permissions import AuthorOnlyPermission
 from api.serializers import (FavoriteSerializer, IngredientSerializer,
-                             RecipSerializer, RecipWriteSerializer,
+                             RecipeSerializer, RecipeWriteSerializer,
                              ShoppingCartSerializer, SubscriptionsSerializer,
                              TagSerializer, TokenSerializer,
                              UpdateUserPasswordSerializer, UserListSerializer,
                              UserSerializer)
-from recipes.models import (Favorite, Ingredient, IngredientRecip, Recip,
+from recipes.models import (Favorite, Ingredient, IngredientRecipe, Recipe,
                             ShoppingCart, Subscription, Tag, User)
 
 
@@ -121,9 +120,9 @@ class DeleteApiToken(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class RecipViewSet(viewsets.ModelViewSet):
-    queryset = Recip.objects.all()
-    serializer_class = RecipSerializer
+class RecipeViewSet(viewsets.ModelViewSet):
+    queryset = Recipe.objects.all()
+    serializer_class = RecipeSerializer
     http_method_names = ['get', 'post', 'patch', 'delete']
     permission_classes = (IsAuthenticatedOrReadOnly, AuthorOnlyPermission)
     pagination_class = CustomPagination
@@ -132,8 +131,8 @@ class RecipViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
-            return RecipSerializer
-        return RecipWriteSerializer
+            return RecipeSerializer
+        return RecipeWriteSerializer
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -155,35 +154,35 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     pagination_class = None
 
 
-class FavoriteShoppingCardView(
+class FavoriteShoppingCartView(
     generics.CreateAPIView, generics.DestroyAPIView
 ):
     serializer_class = ShoppingCartSerializer
     permission_classes = (IsAuthenticated,)
 
-    def get_recip(self):
-        recip_id = self.kwargs.get('id')
-        return get_object_or_404(Recip, pk=recip_id)
+    def get_recipe(self):
+        recipe_id = self.kwargs.get('recipe_id')
+        return get_object_or_404(Recipe, pk=recipe_id)
 
     def perform_create(self, serializer):
         serializer.save(
             author=self.request.user,
-            recip=self.get_recip()
+            recipe=self.get_recipe()
         )
 
     def perform_destroy(self, instance):
         instance.delete()
 
 
-class FavoriteRecipView(FavoriteShoppingCardView):
+class FavoriteRecipeView(FavoriteShoppingCartView):
     serializer_class = FavoriteSerializer
 
     def get_queryset(self):
-        return self.get_recip().favorited.all()
+        return self.get_recipe().favorited.all()
 
     def destroy(self, request, *args, **kwargs):
         instance = Favorite.objects.filter(
-            author=self.request.user, recip=self.get_recip()
+            author=self.request.user, recipe=self.get_recipe()
         )
         if not instance:
             return Response(
@@ -194,15 +193,15 @@ class FavoriteRecipView(FavoriteShoppingCardView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class ShoppingCartView(FavoriteShoppingCardView):
+class ShoppingCartView(FavoriteShoppingCartView):
     serializer_class = ShoppingCartSerializer
 
     def get_queryset(self):
-        return self.get_recip().shopping_carts.all()
+        return self.get_recipe().shopping_carts.all()
 
     def destroy(self, request, *args, **kwargs):
         instance = ShoppingCart.objects.filter(
-            author=self.request.user, recip=self.get_recip()
+            author=self.request.user, recipe=self.get_recipe()
         )
         if not instance:
             return Response(
@@ -223,18 +222,12 @@ class ShoppingCartFile(APIView):
                 "Content-Disposition": 'attachment; filename="recipe.txt"'
             },
         )
-        writer = csv.writer(response, delimiter=' ', quotechar='|')
-        ingredients = IngredientRecip.objects.filter(
-            recip__shopping_carts__author=request.user.id
+        ingredients = IngredientRecipe.objects.filter(
+            recipe__shopping_carts__author=request.user.id
         ).values(
             'ingredient__name', 'ingredient__measurement_unit'
         ).annotate(
             amount=Sum('amount')
         )
-        for ingredient in ingredients:
-            writer.writerow([
-                f'{ingredient.get("ingredient__name")} '
-                f'({ingredient.get("ingredient__measurement_unit")}) - '
-                f'{ingredient.get("amount")}'
-            ])
+        download_file(response, ingredients)
         return response

@@ -30,8 +30,8 @@ class Command(BaseCommand):
             f'{PATH_TO_FILE}{name_file}', 'r', encoding='utf-8'
         ) as csvfile:
             reader = csv.reader(csvfile)
-            for data in reader:
-                model.objects.create(name=data[0], measurement_unit=data[1])
+            for name, unit in reader:
+                model.objects.create(name=name, measurement_unit=unit)
             self.stdout.write(
                 self.style.SUCCESS('Данные из файла загружены')
             )

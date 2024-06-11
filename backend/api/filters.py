@@ -1,6 +1,6 @@
 from django_filters import rest_framework as filters
 
-from recipes.models import Recip, Tag
+from recipes.models import Recipe, Tag
 
 
 class RecipesFilter(filters.FilterSet):
@@ -18,7 +18,7 @@ class RecipesFilter(filters.FilterSet):
     )
 
     class Meta:
-        models = Recip
+        models = Recipe
         fields = ('author', 'tags', 'is_favorited', 'is_in_shopping_cart')
 
     def is_favorited_filter(self, queryset, name, value):

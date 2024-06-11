@@ -1,16 +1,16 @@
 from django.urls import include, path
 from rest_framework import routers
 
-from api.views import (APIToken, DeleteApiToken, FavoriteRecipView,
-                       IngredientViewSet, RecipViewSet, ShoppingCartFile,
+from api.views import (APIToken, DeleteApiToken, FavoriteRecipeView,
+                       IngredientViewSet, RecipeViewSet, ShoppingCartFile,
                        ShoppingCartView, TagViewSet, UpdateUserPassword,
                        UserViewSet)
 
-router = routers.DefaultRouter()
-router.register('recipes', RecipViewSet)
-router.register('tags', TagViewSet)
-router.register('ingredients', IngredientViewSet)
-router.register('users', UserViewSet)
+router_v1 = routers.DefaultRouter()
+router_v1.register('recipes', RecipeViewSet)
+router_v1.register('tags', TagViewSet)
+router_v1.register('ingredients', IngredientViewSet)
+router_v1.register('users', UserViewSet)
 
 auth_urls = [
     path('login/', APIToken.as_view(), name='token_create'),
@@ -24,12 +24,12 @@ urlpatterns = [
         name='download_file'
     ),
     path(
-        'recipes/<int:id>/favorite/',
-        FavoriteRecipView.as_view(),
+        'recipes/<int:recipe_id>/favorite/',
+        FavoriteRecipeView.as_view(),
         name='favorited'
     ),
     path(
-        'recipes/<int:id>/shopping_cart/',
+        'recipes/<int:recipe_id>/shopping_cart/',
         ShoppingCartView.as_view(),
         name='shopping_cart'
     ),
@@ -39,5 +39,5 @@ urlpatterns = [
         UpdateUserPassword.as_view(),
         name='set_password'
     ),
-    path('', include(router.urls)),
+    path('', include(router_v1.urls)),
 ]
