@@ -163,7 +163,7 @@ class Favorite(FavoriteShoppingCartModel):
         )
 
     def __str__(self):
-        return f'Рецепт {self.recip} добавлен у пользователя {self.author}'
+        return f'Рецепт {self.recipe} добавлен у пользователя {self.author}'
 
 
 class ShoppingCart(FavoriteShoppingCartModel):
@@ -180,4 +180,4 @@ class ShoppingCart(FavoriteShoppingCartModel):
         )
 
     def __str__(self):
-        return f'Рецепт {self.recip} добавлен у пользователя {self.author}'
+        return f'Рецепт {self.recipe} добавлен у пользователя {self.author}'
