@@ -3,9 +3,6 @@
 
 ### Рабочий проект доступен по адресу https://foodgram-projects.hopto.org/
 ### По адресу https://foodgram-projects.hopto.org/api/docs/ доступна документация api redoc
-### Логин и пароль администратора для просмотра админки проекта:
-* Логин: reviewer
-* Пароль: Admin789
 
 **В проекте используется**
 * Django 3.2.16
